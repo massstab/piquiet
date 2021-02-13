@@ -7,9 +7,9 @@ def get_key():
     return d["key"]
 
 
-def encrypt(text, key=None):
+def encrypt(t, key=None):
     if key is None: key = get_key()
-    b = text.encode()
+    b = t.encode()
     i = int.from_bytes(b, "big")
     return i * key
 
@@ -18,11 +18,12 @@ def decrypt(i, key=None):
     if key is None: key = get_key()
     i = i // key
     b = int.to_bytes(i, 32, "big")
-    text = b.decode("utf-8")
-    return text
+    t = b.decode("utf-8")
+    return t
 
 
 if __name__ == "__main__":
-    c = encrypt("hello world")
-    t = decrypt(c)
-    print(c, t)
+    message = "hello world"
+    enc = encrypt(message)
+    text = decrypt(enc)
+    print(f"{message} >> {enc} >> {text}")
