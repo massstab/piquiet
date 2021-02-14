@@ -8,9 +8,9 @@ def key_from_image(path="sample_image.jpg"):
     im = Image.open(path)
     shape = np.array(im).shape
     key = np.product(np.array(im).reshape(np.product(shape)).shape)
-    d = {"key": int(key)}
-    with open('private.key', 'w') as f:
-        json.dump(d, f)
+    # d = {"key": int(key)}
+    # with open('private.key', 'w') as f:
+    #     json.dump(d, f)
     return key
 
 
