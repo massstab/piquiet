@@ -1,6 +1,6 @@
 /env/
 /venv/
-*.key
-*.config
 /.idea/
 /piquiet/.keys/
+*.key
+*.config
