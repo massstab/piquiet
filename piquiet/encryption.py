@@ -1,5 +1,8 @@
 import json
-
+import base64
+import hashlib
+from Crypto import Random
+from Crypto.Cipher import AES
 
 def get_key():
     with open('private.key', 'r') as f:
