@@ -1,5 +1,4 @@
 import json
-import base64
 import hashlib
 from Cryptodome.Cipher import AES
 import numpy as np
@@ -10,12 +9,26 @@ def generate_key_from_image(path="sample_image.jpg"):
     im = Image.open(path)
     shape = np.array(im).shape
     ding = int(np.product(np.array(im).reshape(np.product(shape)).shape))
-    return hashlib.sha256(int.to_bytes(ding, 32, 'big')).hexdigest()
+    k = hashlib.sha256(int.to_bytes(ding, 32, 'big')).hexdigest()
+    d = {"key": str(k)}
+    with open('AES.key', 'w') as f:
+        json.dump(d, f)
+    return k
 
 
 def generate_key_from_string():
     s = input("type something random:")
-    return hashlib.sha256(s.encode()).hexdigest()
+    k = hashlib.sha256(s.encode()).hexdigest()
+    d = {"key": str(k)}
+    with open('AES.key', 'w') as f:
+        json.dump(d, f)
+    return k
+
+
+def get_key(path="AES.key"):
+    with open('AES.key', 'r') as f:
+        k = json.load(f)
+    return bytearray.fromhex(k["key"])
 
 
 def encrypt(k, data):
@@ -37,9 +50,15 @@ def decrypt(k, ciphertext, t, n):
 if __name__ == "__main__":
     message = b"hello world"
 
-    key = generate_key_from_string()
-    print(key)
-    key = bytearray.fromhex(key)
+    # key = generate_key_from_string()
+    #
+    # print(key)
+    #
+    # key = bytearray.fromhex(key)
+    #
+    # print(key)
+
+    key = get_key()
 
     enc, tag, nonce = encrypt(key, message)
 
