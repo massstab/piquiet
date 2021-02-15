@@ -47,18 +47,18 @@ def generate_rsa_key():
     if d < 0:
         d = k
     d = {"key": int(d)}
-    with open('private.key', 'w') as f:
+    with open('.keys/private.key', 'w') as f:
         json.dump(d, f)
     d = {"N": int(N),
          "e": int(e)}
-    with open('public.key', 'w') as f:
+    with open('.keys/public.key', 'w') as f:
         json.dump(d, f)
 
 
 def encrypt(m):
     data = []
     for t in m:
-        with open('public.key', 'r') as f:
+        with open('.keys/public.key', 'r') as f:
             public = json.load(f)
         b = t.encode()
         i = int.from_bytes(b, "big")
@@ -67,9 +67,9 @@ def encrypt(m):
 
 
 def decrypt(i):
-    with open('private.key', 'r') as f:
+    with open('.keys/private.key', 'r') as f:
         private = json.load(f)
-    with open('public.key', 'r') as f:
+    with open('.keys/public.key', 'r') as f:
         public = json.load(f)
     s = ""
     for j in i:

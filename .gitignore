@@ -3,3 +3,4 @@
 *.key
 *.config
 /.idea/
+/piquiet/.keys/

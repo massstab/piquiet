@@ -11,7 +11,7 @@ def generate_key_from_image(path="sample_image.jpg"):
     ding = int(np.product(np.array(im).reshape(np.product(shape)).shape))
     k = hashlib.sha256(int.to_bytes(ding, 32, 'big')).hexdigest()
     d = {"key": str(k)}
-    with open('AES.key', 'w') as f:
+    with open('.keys/AES.key', 'w') as f:
         json.dump(d, f)
     return k
 
@@ -20,12 +20,12 @@ def generate_key_from_string():
     s = input("type something random:")
     k = hashlib.sha256(s.encode()).hexdigest()
     d = {"key": str(k)}
-    with open('AES.key', 'w') as f:
+    with open('.keys/AES.key', 'w') as f:
         json.dump(d, f)
     return k
 
 
-def get_key(path="AES.key"):
+def get_key(path=".keys/AES.key"):
     with open(path, 'r') as f:
         k = json.load(f)
     return bytearray.fromhex(k["key"])
