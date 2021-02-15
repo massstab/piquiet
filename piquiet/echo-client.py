@@ -9,9 +9,9 @@ def get_config(server, path="connection.config"):
     return c[server]["hostname"], c[server]["port"]
 
 
-def listen(HOST, PORT):
+def listen(hostname, port):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect((HOST, PORT))
+        s.connect((hostname, port))
         s.sendall(b'Hello, world')
         data = s.recv(1024)
     return repr(data)
