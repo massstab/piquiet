@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
-
+import json
 import socket
 
-HOST = '127.0.0.1'  # The server's hostname or IP address
-PORT = 65432        # The port used by the server
+
+def get_config(server, path="connection.config"):
+    with open(path, 'r') as f:
+        c = json.load(f)
+    return c[server]["hostname"], c[server]["port"]
 
 
-def listen():
+def listen(HOST, PORT):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((HOST, PORT))
         s.sendall(b'Hello, world')
@@ -15,4 +18,4 @@ def listen():
 
 
 if __name__ == "__main__":
-    print(f"Received: {listen()}")
+    print(f'Received: {listen(*get_config("dave"))}')
