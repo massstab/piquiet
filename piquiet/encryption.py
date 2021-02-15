@@ -26,7 +26,7 @@ def generate_key_from_string():
 
 
 def get_key(path="AES.key"):
-    with open('AES.key', 'r') as f:
+    with open(path, 'r') as f:
         k = json.load(f)
     return bytearray.fromhex(k["key"])
 
