@@ -6,25 +6,29 @@ import numpy as np
 from PIL import Image
 
 
-def generate_key(path="sample_image.jpg"):
+def generate_key_from_image(path="sample_image.jpg"):
     im = Image.open(path)
     shape = np.array(im).shape
     ding = int(np.product(np.array(im).reshape(np.product(shape)).shape))
-    return hashlib.sha256(int.to_bytes(ding, 32, 'big')).digest()
+    return hashlib.sha256(int.to_bytes(ding, 32, 'big')).hexdigest()
 
 
-def encrypt(key, data):
-    cipher = AES.new(key, AES.MODE_EAX)
-    nonce = cipher.nonce
-    ciphertext, tag = cipher.encrypt_and_digest(data)
-    return ciphertext, tag, nonce
+def generate_key_from_string():
+    s = input("type something random:")
+    return hashlib.sha256(s.encode()).hexdigest()
 
 
-def decrypt(key, ciphertext, tag, nonce):
-    cipher = AES.new(key, AES.MODE_EAX, nonce=nonce)
+def encrypt(k, data):
+    cipher = AES.new(k, AES.MODE_EAX)
+    ciphertext, t = cipher.encrypt_and_digest(data)
+    return ciphertext, t, cipher.nonce
+
+
+def decrypt(k, ciphertext, t, n):
+    cipher = AES.new(k, AES.MODE_EAX, nonce=n)
     data = cipher.decrypt(ciphertext)
     try:
-        cipher.verify(tag)
+        cipher.verify(t)
         return data
     except ValueError:
         return False
@@ -33,8 +37,9 @@ def decrypt(key, ciphertext, tag, nonce):
 if __name__ == "__main__":
     message = b"hello world"
 
-    key = generate_key()
+    key = generate_key_from_string()
     print(key)
+    key = bytearray.fromhex(key)
 
     enc, tag, nonce = encrypt(key, message)
 
