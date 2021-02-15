@@ -1,32 +1,33 @@
 import json
 import base64
 import hashlib
-from Crypto import Random
-from Crypto.Cipher import AES
-
-def get_key():
-    with open('private.key', 'r') as f:
-        d = json.load(f)
-    return d["key"]
+from Cryptodome.Cipher import AES
 
 
-def encrypt(t, key=None):
-    if key is None: key = get_key()
-    b = t.encode()
-    i = int.from_bytes(b, "big")
-    return i * key
+def encrypt(key, data):
+    cipher = AES.new(key, AES.MODE_EAX)
+    nonce = cipher.nonce
+    ciphertext, tag = cipher.encrypt_and_digest(data)
+    return ciphertext, tag, nonce
 
 
-def decrypt(i, key=None):
-    if key is None: key = get_key()
-    i = i // key
-    b = int.to_bytes(i, 32, "big")
-    t = b.decode("utf-8")
-    return t
+def decrypt(key, ciphertext, tag, nonce):
+    cipher = AES.new(key, AES.MODE_EAX, nonce=nonce)
+    data = cipher.decrypt(ciphertext)
+    try:
+        cipher.verify(tag)
+        return data
+    except ValueError:
+        return False
 
 
 if __name__ == "__main__":
-    message = "hello world"
-    enc = encrypt(message)
-    text = decrypt(enc)
+    message = b"hello world"
+
+    key = hashlib.sha256(b"Nobody").digest()
+    print(key)
+
+    enc, tag, nonce = encrypt(key, message)
+
+    text = decrypt(key, enc, tag, nonce)
     print(f"{message} >> {enc} >> {text}")
