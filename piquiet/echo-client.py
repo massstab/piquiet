@@ -7,16 +7,38 @@ from piquiet.encryption import encrypt, decrypt, get_key
 class Server:
 
     def __init__(self, server):
+        """
+        Class to connect to dave's or linus' raspberry pi server
+
+        :param server: name of server to connect to
+        :type server: String
+        """
         self.hostname, self.port = self.get_config(server)
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     @staticmethod
     def get_config(server, path="connection.config"):
+        """
+        Static method to get the configuration for the server connection
+
+        :param server: name of server to connect to
+        :type server: String
+        :param path: path of the configuration file
+        :type path: String
+        :return: hostname, port
+        :rtype: String, Int
+        """
         with open(path, 'r') as f:
             c = json.load(f)
         return c[server]["hostname"], c[server]["port"]
 
     def send(self, message):
+        """
+        Encrypt and send message to the server
+
+        :param message: unencrypted message to send
+        :type message: String
+        """
         key = get_key()
         enc, tag, nonce = encrypt(key, message.encode())
         self.s.connect((self.hostname, self.port))
@@ -28,6 +50,12 @@ class Server:
         self.s.sendall(b"\n")
 
     def listen(self):
+        """
+        Receive and decrypt a message from the server
+
+        :return: decrypted message
+        :rtype: String
+        """
         key = get_key()
         o = b""
         while True:
@@ -49,4 +77,4 @@ if __name__ == "__main__":
     # TCP.send("hi dave, this is a super long message. ueble sache maloney..
     # cool stuff.. yes.. und denn ischsi verruuckt worde.. heute hast du aber hunger, mann")
     TCP.send("hi dave, this is a short message")
-    print(TCP.listen())
+    print(TCP.listen)
