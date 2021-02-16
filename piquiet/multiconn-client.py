@@ -4,6 +4,7 @@ import sys
 import socket
 import selectors
 import types
+import json
 
 sel = selectors.DefaultSelector()
 messages = [b"Message 1 from client.", b"Message 2 from client."]
@@ -48,24 +49,37 @@ def service_connection(key, mask):
             sent = sock.send(data.outb)  # Should be ready to write
             data.outb = data.outb[sent:]
 
+def get_config(server, path="connection.config"):
+    """
+    Static method to get the configuration for the server connection
 
-if len(sys.argv) != 4:
-    print("usage:", sys.argv[0], "<host> <port> <num_connections>")
-    sys.exit(1)
+    :param server: name of server to connect to
+    :type server: String
+    :param path: path of the configuration file
+    :type path: String
+    :return: hostname, port
+    :rtype: String, Int
+    """
+    with open(path, 'r') as f:
+        c = json.load(f)
+    return c[server]["hostname"], c[server]["port"]
 
-host, port, num_conns = sys.argv[1:4]
-start_connections(host, int(port), int(num_conns))
 
-try:
-    while True:
-        events = sel.select(timeout=1)
-        if events:
-            for key, mask in events:
-                service_connection(key, mask)
-        # Check for a socket being monitored to continue.
-        if not sel.get_map():
-            break
-except KeyboardInterrupt:
-    print("caught keyboard interrupt, exiting")
-finally:
-    sel.close()
+if __name__ == '__main__':
+    host, port, num_conns = *get_config('dave'), 1
+
+    start_connections(host, int(port), int(num_conns))
+
+    try:
+        while True:
+            events = sel.select(timeout=1)
+            if events:
+                for key, mask in events:
+                    service_connection(key, mask)
+            # Check for a socket being monitored to continue.
+            if not sel.get_map():
+                break
+    except KeyboardInterrupt:
+        print("caught keyboard interrupt, exiting")
+    finally:
+        sel.close()

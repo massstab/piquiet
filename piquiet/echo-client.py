@@ -97,8 +97,8 @@ class Server:
 
 if __name__ == "__main__":
     # can use the send command once, and the receive command to get the echo
-    TCP = Server("linus")
-    for i in range(1000):
+    TCP = Server("dave")
+    for i in range(10):
         TCP.send("Lorem ipsum dolor sit amet, consectetur adipisici elit, sed eiusmod "
                  "tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, "
                  "quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat. "
