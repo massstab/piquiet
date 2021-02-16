@@ -52,7 +52,7 @@ class Server:
         key = get_key()
         # encrypt the message
         enc, tag, nonce = encrypt(key, message.encode())
-        # send the encrypted message + tag + nonce ended by \n
+        # send the encrypted message + tag + nonce ended by \x00\x01\x00
         if len(enc + tag + nonce + b"\x00\x01\x00") > 128:
             raise Exception("Message is too long!")
         self.s.send(enc)
@@ -106,3 +106,4 @@ if __name__ == "__main__":
                  "Excepteur sint obcaecat cupiditat non proident, sunt in culpa "
                  "qui officia deserunt mollit anim id est laborum.")
         print(TCP.listen())
+
