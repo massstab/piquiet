@@ -2,7 +2,7 @@
 import json
 import socket
 from piquiet.encryption import encrypt, decrypt, get_key
-
+import sys
 
 class Server:
 
@@ -44,13 +44,12 @@ class Server:
         # encrypt the message
         enc, tag, nonce = encrypt(key, message.encode())
         # send the encrypted message + tag + nonce ended by \n
-        print(len(enc))
-        print(len(tag))
-        print(len(nonce))
-        self.s.sendall(enc)
-        self.s.sendall(tag)
-        self.s.sendall(nonce)
-        self.s.sendall(b"\n")
+        if len(enc + tag + nonce + b"\x00") > 128:
+            raise Exception("Message is too long!")
+        self.s.send(enc)
+        self.s.send(tag)
+        self.s.send(nonce)
+        self.s.send(b"\x00")
 
     def listen(self):
         """
@@ -63,17 +62,12 @@ class Server:
         o = b""
         while True:
             data = self.s.recv(1024)
-            # if not data:
-            #     # if nothing is received
-            #     break
             o += data
-            if b"\n" in data:
-                # if end of packet is detecte§d
+            if data[-1:] == b"\x00":
                 break
 
         # replace end of packet
-        print(o)
-        o = o.replace(b"\n", b"")
+        o = o[:-1]
         print(o)
         # split the packet into three items
         # tag and nonce are always of length 16, enc is the rest.
@@ -89,7 +83,7 @@ if __name__ == "__main__":
     # can use the send command once, and the receive command to get the echo
     # TODO: longer messages require multiple packets (length 1024),
     #  implement splitting the message and receiving multiple packets separated by \n
-    TCP = Server("linus")
-    TCP.send("hi linus, this is a looooooooooooong message, hehe, "
-             "hehehehehehehajdfhjkahsfkjhasdlf asdfasdf asdd")
-    print(TCP.listen())
+    for i in range(1000):
+        TCP = Server("linus")
+        TCP.send("hi linus, this is a test")
+        print(TCP.listen())
