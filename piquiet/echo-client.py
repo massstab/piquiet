@@ -43,11 +43,12 @@ class Server:
         key = get_key()
         # encrypt the message
         enc, tag, nonce = encrypt(key, message.encode())
-        # send the encrypted message + tag + nonce separated by \t and ended by \n
+        # send the encrypted message + tag + nonce ended by \n
+        print(len(enc))
+        print(len(tag))
+        print(len(nonce))
         self.s.sendall(enc)
-        self.s.sendall(b"\t")
         self.s.sendall(tag)
-        self.s.sendall(b"\t")
         self.s.sendall(nonce)
         self.s.sendall(b"\n")
 
@@ -67,14 +68,18 @@ class Server:
             #     break
             o += data
             if b"\n" in data:
-                # if end of packet is detected
+                # if end of packet is detecte§d
                 break
 
         # replace end of packet
+        print(o)
         o = o.replace(b"\n", b"")
         print(o)
         # split the packet into three items
-        enc, tag, nonce = o.split(b'\t')
+        # tag and nonce are always of length 16, enc is the rest.
+        nonce = o[-16:]
+        tag = o[-32:-16]
+        enc = o[:-32]
         # decrypt the message
         data = decrypt(key, enc, tag, nonce)
         return data
@@ -85,5 +90,6 @@ if __name__ == "__main__":
     # TODO: longer messages require multiple packets (length 1024),
     #  implement splitting the message and receiving multiple packets separated by \n
     TCP = Server("linus")
-    TCP.send("hi linus, this is a short message")
+    TCP.send("hi linus, this is a looooooooooooong message, hehe, "
+             "hehehehehehehajdfhjkahsfkjhasdlf asdfasdf asdd")
     print(TCP.listen())
