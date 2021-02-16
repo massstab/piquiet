@@ -81,15 +81,19 @@ class Server:
             except BlockingIOError:
                 output = ""
                 while len(o) > 0:
+                    # get data from header
                     header = o[:13].decode().split(",")
                     enc_len = int(header[0])
                     tag_len = int(header[1])
                     nonce_len = int(header[2])
+                    # split message according to header
                     enc = o[13:13 + enc_len]
                     tag = o[13 + enc_len:13 + enc_len + tag_len]
                     nonce = o[13 + enc_len + tag_len:13 + enc_len + tag_len + nonce_len]
+                    # decrypt the message
                     d = decrypt(key, enc, tag, nonce)
                     output += d.decode()
+                    # delete the first packet from received string
                     o = o[13 + enc_len + tag_len + nonce_len:]
                 if output != "":
                     print(output)
