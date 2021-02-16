@@ -15,6 +15,7 @@ class Server:
         """
         self.hostname, self.port = self.get_config(server)
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.s.connect((self.hostname, self.port))
 
     @staticmethod
     def get_config(server, path="connection.config"):
@@ -40,8 +41,9 @@ class Server:
         :type message: String
         """
         key = get_key()
+        # encrypt the message
         enc, tag, nonce = encrypt(key, message.encode())
-        self.s.connect((self.hostname, self.port))
+        # send the encrypted message + tag + nonce separated by \t and ended by \n
         self.s.sendall(enc)
         self.s.sendall(b"\t")
         self.s.sendall(tag)
@@ -60,14 +62,20 @@ class Server:
         o = b""
         while True:
             data = self.s.recv(1024)
-            if not data:
-                break
+            # if not data:
+            #     # if nothing is received
+            #     break
             o += data
             if b"\n" in data:
+                # if end of packet is detected
                 break
+
+        # replace end of packet
         o = o.replace(b"\n", b"")
         print(o)
+        # split the packet into three items
         enc, tag, nonce = o.split(b'\t')
+        # decrypt the message
         data = decrypt(key, enc, tag, nonce)
         return data
 
@@ -77,4 +85,4 @@ if __name__ == "__main__":
     # TCP.send("hi dave, this is a super long message. ueble sache maloney..
     # cool stuff.. yes.. und denn ischsi verruuckt worde.. heute hast du aber hunger, mann")
     TCP.send("hi dave, this is a short message")
-    print(TCP.listen)
+    print(TCP.listen())
