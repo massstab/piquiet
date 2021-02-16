@@ -3,6 +3,8 @@ import json
 import socket
 from piquiet.encryption import encrypt, decrypt, get_key
 import sys
+import time
+
 
 class Server:
 
@@ -87,3 +89,4 @@ if __name__ == "__main__":
         TCP = Server("linus")
         TCP.send("hi linus, this is a test")
         print(TCP.listen())
+        time.sleep(1)
