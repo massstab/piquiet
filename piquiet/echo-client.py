@@ -55,7 +55,7 @@ class Server:
         key = get_key()
         # encrypt the message
         enc, tag, nonce = encrypt(key, message.encode())
-        # send the encrypted message + tag + nonce ended by self.separator
+        # send the header plus the encrypted message + tag + nonce
         header = f"{len(enc):03}, {len(tag):03}, {len(nonce):03}".encode()
         if len(header + enc + tag + nonce) > self.max_length:
             raise Exception("Message is too long!")
