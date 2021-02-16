@@ -18,7 +18,10 @@ class Server:
         self.hostname, self.port = self.get_config(server)
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.s.connect((self.hostname, self.port))
+        self.s.setblocking(False)
         self.packet_length = 10
+        self.max_length = 128
+        self.separator = b"\x00\x01\x01\x00"
 
     @staticmethod
     def get_config(server, path="connection.config"):
@@ -52,14 +55,15 @@ class Server:
         key = get_key()
         # encrypt the message
         enc, tag, nonce = encrypt(key, message.encode())
-        # send the encrypted message + tag + nonce ended by \x00\x01\x00
-        if len(enc + tag + nonce + b"\x00\x01\x00") > 128:
+        # send the encrypted message + tag + nonce ended by self.separator
+        header = f"{len(enc):03}, {len(tag):03}, {len(nonce):03}".encode()
+        if len(header + enc + tag + nonce) > self.max_length:
             raise Exception("Message is too long!")
+        self.s.send(header)
         self.s.send(enc)
         self.s.send(tag)
         self.s.send(nonce)
-        self.s.send(b"\x00\x01\x00")
-        # print(enc + tag + nonce + b"\x00\x01\x00")
+        # print(enc + tag + nonce + self.separator)
 
     def listen(self):
         """
@@ -71,39 +75,38 @@ class Server:
         key = get_key()
         o = b""
         while True:
-            data = self.s.recv(1024)
-            o += data
-            if data[-3:] == b"\x00\x01\x00":
-                break
-        # replace end of packet
-        o = o[:-3]
-        # print(o)
-        ms = o.split(b"\x00\x01\x00")
-        # print(ms)
-        # split the packet into three items
-        # tag and nonce are always of length 16, enc is the rest.
-        data = ""
-        for o in ms:
-            nonce = o[-16:]
-            tag = o[-32:-16]
-            enc = o[:-32]
-            # decrypt the message
-            d = decrypt(key, enc, tag, nonce)
-            if not d:
-                raise Exception("Error decoding the message.")
-            data += d.decode()
-        return data
+            try:
+                data = self.s.recv(1024)
+                o += data
+            except BlockingIOError:
+                output = ""
+                while len(o) > 0:
+                    header = o[:13].decode().split(",")
+                    enc_len = int(header[0])
+                    tag_len = int(header[1])
+                    nonce_len = int(header[2])
+                    enc = o[13:13 + enc_len]
+                    tag = o[13 + enc_len:13 + enc_len + tag_len]
+                    nonce = o[13 + enc_len + tag_len:13 + enc_len + tag_len + nonce_len]
+                    d = decrypt(key, enc, tag, nonce)
+                    output += d.decode()
+                    o = o[13 + enc_len + tag_len + nonce_len:]
+                if output != "":
+                    print(output)
+        return output
+
+    def close(self):
+        self.s.close()
 
 
 if __name__ == "__main__":
     # can use the send command once, and the receive command to get the echo
     TCP = Server("linus")
-    for i in range(1000):
-        TCP.send("Lorem ipsum dolor sit amet, consectetur adipisici elit, sed eiusmod "
-                 "tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, "
-                 "quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat. "
-                 "Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. "
-                 "Excepteur sint obcaecat cupiditat non proident, sunt in culpa "
-                 "qui officia deserunt mollit anim id est laborum.")
-        print(TCP.listen())
-
+    TCP.send("Lorem ipsum dolor sit amet, consectetur adipisici elit, sed eiusmod "
+             "tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, "
+             "quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat. "
+             "Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. "
+             "Excepteur sint obcaecat cupiditat non proident, sunt in culpa "
+             "qui officia deserunt mollit anim id est laborum.")
+    TCP.listen()
+    TCP.close()
