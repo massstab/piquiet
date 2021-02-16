@@ -97,8 +97,6 @@ class Server:
 
 if __name__ == "__main__":
     # can use the send command once, and the receive command to get the echo
-    # TODO: longer messages require multiple packets (length 1024),
-    #  implement splitting the message and receiving multiple packets separated by \x00
     TCP = Server("linus")
     for i in range(1000):
         TCP.send("Lorem ipsum dolor sit amet, consectetur adipisici elit, sed eiusmod "
