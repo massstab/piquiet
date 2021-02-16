@@ -81,8 +81,9 @@ class Server:
 
 
 if __name__ == "__main__":
-    TCP = Server("dave")
-    # TCP.send("hi dave, this is a super long message. ueble sache maloney..
-    # cool stuff.. yes.. und denn ischsi verruuckt worde.. heute hast du aber hunger, mann")
-    TCP.send("hi dave, this is a short message")
+    # can use the send command once, and the receive command to get the echo
+    # TODO: longer messages require multiple packets (length 1024),
+    #  implement splitting the message and receiving multiple packets separated by \n
+    TCP = Server("linus")
+    TCP.send("hi linus, this is a short message")
     print(TCP.listen())
