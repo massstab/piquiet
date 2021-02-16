@@ -102,12 +102,12 @@ if __name__ == "__main__":
     # load the key
     key = get_key()
 
-    message = b"hello world"
+    read_nohub()
 
     # encrypt the message
-    enc, tag, nonce = encrypt(key, message)
+    # enc, tag, nonce = encrypt(key, message)
 
     # decrypt the message
-    text = decrypt(key, enc, tag, nonce)
-
-    print(f"{message} >> {enc} >> {text}")
+    # text = decrypt(key, enc, tag, nonce)
+    #
+    # print(f"{message} >> {enc} >> {text}")
