@@ -1,4 +1,4 @@
 matplotlib~=3.3.4
 numpy>=1.21
-Pillow~=9.0.0
+pillow>=9.2.0
 pycryptodomex~=3.10.1
